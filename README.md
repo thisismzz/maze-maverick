@@ -3,5 +3,4 @@ IUST CS final project
 programers : 
 zainab kaviani 
 &
-mahdi zinalzade 
-nbvcklloiuygfdknbvcx
+mahdi zeinalzadeh 
