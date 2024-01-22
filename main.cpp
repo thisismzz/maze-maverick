@@ -13,15 +13,11 @@ int x,y,path_len,amount_u=3,amount_d=-3,block_u=5,block_d=2;
 void print_menu();
 void create_map_easy(string="");
 void menu();
+void add_to_map_file(string,string,string,string);
 
 
 int main(){
     menu();
-    while(true){
-        create_map_easy("Easy");
-        cout<<endl;
-        Sleep(3000);
-    }
 
 }
 
@@ -32,6 +28,7 @@ void print_menu(){
     cout<<"4. History\n";
     cout<<"5. Leaderboard\n";
     cout<<"6. Exit\n";
+    cout<<"Enter your option : \n";
 
 }
 
@@ -87,7 +84,7 @@ void create_map_easy(string name){
         }
     }
     //specifing the path
-    string path_map="";
+    string path_map="",path;
     srand(0);
     for(int i=1;i<=x-1;i++){
         path_map+='d';
@@ -95,8 +92,8 @@ void create_map_easy(string name){
     for(int i=1;i<=y-1;i++){
         path_map+='r';
     }
-    
-    int a=0,b=0,hold,hold1=0,sum=amount_u;
+    path=path_map;
+    int a=0,b=0,hold,sum=amount_u;
     board[0][0]=amount_u;
     while(true){
         hold=rand()%path_map.size();
@@ -115,7 +112,6 @@ void create_map_easy(string name){
                 break;
             case 'r':
                 b++;
-                hold1++;
                 do {
                     board[a][b]=(rand()%7)-3;
                 } while (board[a][b]==0);
@@ -147,19 +143,21 @@ void create_map_easy(string name){
         }
         cout<<endl;
     }
-
-}
-
-void add_to_map_file(string mode,string name,string path,int board[100][100]){
-    name+=".txt";
-    name="Maps/"+mode+name;
-    ofstream f(name);
+    string board_element="";
     for(int i=0;i<x;i++){
         for(int j=0;j<y;j++){
-            f<<board[i][j]<<"\t";
+            board_element+=to_string(board[i][j])+"\t";
         }
-        f<<endl;
+        board_element+='\n';
     }
+    add_to_map_file("easy",name,path,board_element);
+}
+
+void add_to_map_file(string mode,string name,string path,string write){
+    name+=".txt";
+    name="Maps/"+mode+"/"+name;
+    ofstream f(name);
+    f<<write<<'\n';
     f<<path;
     f.close();
 }
