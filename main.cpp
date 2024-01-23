@@ -7,6 +7,10 @@
 #include <random>
 #include <filesystem>
 #include <chrono>
+#include <iomanip>
+#include <ctime>
+#define green "\033[32m"
+#define white "\033[0m"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -28,16 +32,15 @@ void create_map_easy(string="");
 void menu();
 void write_map_to_file(string,string,string,string,string);
 void print_file_names(string);
-void print_selected_map(string,bool);
+string print_selected_map(string,bool);
 void creating_account();
 void update_account();
-void playground(string,string="");
+void playground(string);
 
 
 int main(){
     // welcome message
-    cout<<"Hello welcome to this Game!\n"<<"We (Mahdi and Zeinab) hope to enjoy!";
-    Sleep(1000);
+    cout<<white<<"Hello welcome to this Game!\n"<<"We (Mahdi and Zeinab) hope to enjoy!";
     //account process
     string choice;
     cout<<"\nAre you a new user?(y/n)";
@@ -56,13 +59,13 @@ int main(){
 }
 
 void print_menu(){
-    cout<<"1. Create a New Map\n\t- 1.1 Easy\n\t- 1.2 Hard\n";
+    cout<<white<<"1. Create a New Map\n\t- 1.1 Easy\n\t- 1.2 Hard\n";
     cout<<"2. Playground\n\t- 2.1 Choose from Existing Maps\n\t- 2.2 Import a Custom Map\n";
     cout<<"3. Solve a Maze\n\t- 3.1 Choose from Existing Maps\n\t- 3.2 Import a Custom Map\n";
     cout<<"4. History\n";
     cout<<"5. Leaderboard\n";
     cout<<"6. Exit\n";
-    cout<<"Enter your option : \n";
+    cout<<"Enter your option : ";
 
 }
 
@@ -136,7 +139,7 @@ void create_map_easy(string name){
         }
     }
     //specifing the path
-    string path_map="",path,path_elements="";
+    string path_map="",path="",path_elements="[0][0]\t";
     srand(0);
     for(int i=1;i<=x-1;i++){
         path_map+='d';
@@ -144,7 +147,7 @@ void create_map_easy(string name){
     for(int i=1;i<=y-1;i++){
         path_map+='r';
     }
-    path=path_map;
+
     int a=0,b=0,hold,sum=amount_u;
     board[0][0]=amount_u;
     while(true){
@@ -156,6 +159,7 @@ void create_map_easy(string name){
     
         switch (path_map[hold]){
             case 'd':
+                path+='d';
                 a++;
                 do {
                     board[a][b]=(rand()%7)-3;
@@ -164,6 +168,7 @@ void create_map_easy(string name){
                 path_elements+='['+to_string(a)+']'+'['+to_string(b)+']'+"\t";
                 break;
             case 'r':
+                path+='r';
                 b++;
                 do {
                     board[a][b]=(rand()%7)-3;
@@ -224,29 +229,79 @@ void print_file_names(string path){
     }
 }
 
-void print_selected_map(string path,bool answer){
+string print_selected_map(string path,bool answer){
     ifstream f(path);
     string hold;
     int a,b;
     if(answer==false){
+        // f>>hold;
+        // a=stoi(hold);
+        // f>>hold;
+        // b=stoi(hold);
+        // getline(f,hold);
+        // getline(f,hold);
+        // while(hold!="____"){
+        //     cout<<hold<<endl;
+        //     getline(f,hold);
+        // }
+        // getline(f,hold);
+        // f.close();
+        // return hold;
         f>>hold;
         a=stoi(hold);
         f>>hold;
         b=stoi(hold);
         getline(f,hold);
-        while(hold!="____"){
-            cout<<hold<<endl;
-            Sleep(2000);
+        int board[a][b];
+        for(int i=0;i<a;i++){
+            for(int j=0;j<b;j++){
+                f>>hold;
+                board[i][j]=stoi(hold);
+            }
             getline(f,hold);
         }
+        for(int i=0;i<a;i++){
+            for(int j=0;j<b;j++){
+                cout<<board[i][j]<<'\t';
+            }
+            cout<<endl;
+        }
+        getline(f,hold);
         getline(f,hold);
         f.close();
-        playground(path,hold);
-    }
-    // else{
-    //     while()
+        return hold;
 
-    // }
+
+    }
+    else{
+        f>>hold;
+        a=stoi(hold);
+        f>>hold;
+        b=stoi(hold);
+        getline(f,hold);
+        int board[a][b];
+        for(int i=0;i<a;i++){
+            for(int j=0;j<b;j++){
+                f>>hold;
+                board[i][j]=stoi(hold);
+            }
+            getline(f,hold);
+        }
+
+        getline(f,hold);
+        getline(f,hold);
+        getline(f,hold);
+        for(int i=0;i<a;i++){
+            for(int j=0;j<b;j++){
+                if(hold.find('['+to_string(i)+']'+'['+to_string(j)+']')<=hold.size())
+                    cout<<green<<board[i][j]<<'\t';
+                else
+                    cout<<white<<board[i][j]<<'\t';
+            }
+            cout<<endl;
+        }
+    }
+    return "";
 }
 
 void creating_account(){
@@ -273,13 +328,26 @@ void update_account(){
     p1.close();
 }
 
-void playground(string map_path,string answer){
-    print_selected_map(map_path,false);
+void playground(string map_path){
+    string answer;
+    answer=print_selected_map(map_path,false);
     cout<<"\nEnter your path (example : ddrulud)";
     string user_ans;
     cin>>user_ans;
     if(user_ans==answer){
         cout<<"\ncongratulations! you answer is correct\n";
-        print_selected_map(map_path,true);
+        A.win_count++;
+        time_t currentTime = std::time(nullptr);
+        tm* timeInfo = localtime(&currentTime);
+        stringstream ss;
+        ss<<put_time(timeInfo, "%Y-%m-%d %H:%M:%S");
+        A.last_win_time=ss.str();
+        answer=print_selected_map(map_path,true);
     }
+
+    else{
+        cout<<"sorry your answer is incorrect :(\nthe right answer is "<<answer<<endl;
+        answer=print_selected_map(map_path,true);
+    }
+    menu();
 }
