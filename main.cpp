@@ -5,15 +5,18 @@
 #include <vector>
 #include <fstream>
 #include <random>
+#include <filesystem>
 
 using namespace std;
+namespace fs = std::filesystem;
 
 int x,y,path_len,amount_u=3,amount_d=-3,block_u=5,block_d=2;
 
 void print_menu();
 void create_map_easy(string="");
 void menu();
-void add_to_map_file(string,string,string,string);
+void write_map_to_file(string,string,string,string,string);
+void print_file_names(string);
 
 
 int main(){
@@ -49,7 +52,14 @@ void menu(){
 
     }
     if(option=="2.1"){
-
+        string chose;
+        cout<<"hard or easy? ";
+        cin>>chose;
+        chose="Maps/"+chose+"/";
+        print_file_names(chose);
+        cout<<"\nEnter the file name you want : ";
+        cin>>chose;
+        // ..................
     }
     if(option=="2.2"){
 
@@ -84,7 +94,7 @@ void create_map_easy(string name){
         }
     }
     //specifing the path
-    string path_map="",path;
+    string path_map="",path,path_elements="";
     srand(0);
     for(int i=1;i<=x-1;i++){
         path_map+='d';
@@ -109,6 +119,7 @@ void create_map_easy(string name){
                     board[a][b]=(rand()%7)-3;
                 } while (board[a][b]==0);
                 sum+=board[a][b];
+                path_elements+='['+to_string(a)+']'+'['+to_string(b)+']'+"\t";
                 break;
             case 'r':
                 b++;
@@ -116,6 +127,7 @@ void create_map_easy(string name){
                     board[a][b]=(rand()%7)-3;
                 } while (board[a][b]==0);
                 sum+=board[a][b];
+                path_elements+='['+to_string(a)+']'+'['+to_string(b)+']'+"\t";   //adding element index of path to a string
                 break;
         }
         if(a==x-1 and b==y-1)
@@ -143,21 +155,28 @@ void create_map_easy(string name){
         }
         cout<<endl;
     }
-    string board_element="";
+
+    string board_into_string="";         //converting board into string form
     for(int i=0;i<x;i++){
         for(int j=0;j<y;j++){
-            board_element+=to_string(board[i][j])+"\t";
+            board_into_string+=to_string(board[i][j])+"\t";
         }
-        board_element+='\n';
+        board_into_string+='\n';
     }
-    add_to_map_file("easy",name,path,board_element);
+    write_map_to_file("easy",name,path,board_into_string,path_elements);
 }
 
-void add_to_map_file(string mode,string name,string path,string write){
+void write_map_to_file(string mode,string name,string path,string write,string path_index){
     name+=".txt";
     name="Maps/"+mode+"/"+name;
     ofstream f(name);
-    f<<write<<'\n';
-    f<<path;
+    f<<write;
+    f<<path<<endl<<path_index;
     f.close();
+}
+
+void print_file_names(string path){
+    for (const auto& entry : fs::directory_iterator(path)){
+            cout << entry.path().filename() << endl;
+    }
 }
