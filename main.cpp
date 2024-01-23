@@ -6,20 +6,51 @@
 #include <fstream>
 #include <random>
 #include <filesystem>
+#include <chrono>
 
 using namespace std;
 namespace fs = std::filesystem;
 
+struct account{
+    string name;
+    int win_count=0;
+    string last_win_time;
+    int total_time;
+}A;
+
+
 int x,y,path_len,amount_u=3,amount_d=-3,block_u=5,block_d=2;
+
+
 
 void print_menu();
 void create_map_easy(string="");
 void menu();
 void write_map_to_file(string,string,string,string,string);
 void print_file_names(string);
+void print_selected_map(string);
+void creating_account();
+void update_account();
 
 
 int main(){
+    // welcome message
+    cout<<"Hello welcome to this Game!\n"<<"We (Mahdi and Zeinab) hope to enjoy!";
+    Sleep(2000);
+    system("cls");
+    //account process
+    string choice;
+    cout<<"Are you a new user?(y/n)";
+    cin>>choice;
+    if(choice=="y"){
+        cout<<"\nLets make your account\n";
+        creating_account();
+    }
+    else{
+        cout<<"please enter your username : ";
+        cin>>A.name;
+        cout<<endl;
+    }
     menu();
 
 }
@@ -36,6 +67,7 @@ void print_menu(){
 }
 
 void menu(){
+    auto startTime = std::chrono::high_resolution_clock::now();
     print_menu();
     string option,name;
     cin>>option;
@@ -52,14 +84,15 @@ void menu(){
 
     }
     if(option=="2.1"){
-        string chose;
+        string chose,chose1;
         cout<<"hard or easy? ";
         cin>>chose;
         chose="Maps/"+chose+"/";
         print_file_names(chose);
         cout<<"\nEnter the file name you want : ";
-        cin>>chose;
-        // ..................
+        cin>>chose1;
+        chose=chose+chose1;
+        print_selected_map(chose);
     }
     if(option=="2.2"){
 
@@ -77,7 +110,16 @@ void menu(){
 
     }
     if(option=="6"){
-
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
+        A.total_time=duration.count();
+        update_account();
+        cout<<"Are you sure you wanna go?";
+        Sleep(1000);
+        cout<<"Really?\n";
+        Sleep(1000);
+        cout<<"OK  Hope to See you soon!\n";
+        exit(0);
     }
     
 }
@@ -179,4 +221,32 @@ void print_file_names(string path){
     for (const auto& entry : fs::directory_iterator(path)){
             cout << entry.path().filename() << endl;
     }
+}
+
+void print_selected_map(string path){
+    ifstream f(path);
+}
+
+void creating_account(){
+    string path="Users/"+A.name+".txt";
+    cout<<"Please choose a username : ";
+    cin>>A.name;
+    ofstream p(path);
+    p<<A.name<<endl<<0<<endl<<0<<endl<<0;
+    p.close();
+}
+
+void update_account(){
+    string path="Users/"+A.name+".txt";
+    ifstream p(path);
+    string hold;
+    getline(p,hold);
+    getline(p,hold);
+    int total_t=stoi(hold)+A.total_time;
+    getline(p,hold);
+    int wins=stoi(hold)+A.win_count;
+    p.close();
+    ofstream p1(path);
+    p1<<A.name<<endl<<total_t<<endl<<wins<<endl<<A.last_win_time;
+    p1.close();
 }
