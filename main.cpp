@@ -28,19 +28,19 @@ void create_map_easy(string="");
 void menu();
 void write_map_to_file(string,string,string,string,string);
 void print_file_names(string);
-void print_selected_map(string);
+void print_selected_map(string,bool);
 void creating_account();
 void update_account();
+void playground(string,string="");
 
 
 int main(){
     // welcome message
     cout<<"Hello welcome to this Game!\n"<<"We (Mahdi and Zeinab) hope to enjoy!";
-    Sleep(2000);
-    system("cls");
+    Sleep(1000);
     //account process
     string choice;
-    cout<<"Are you a new user?(y/n)";
+    cout<<"\nAre you a new user?(y/n)";
     cin>>choice;
     if(choice=="y"){
         cout<<"\nLets make your account\n";
@@ -67,7 +67,7 @@ void print_menu(){
 }
 
 void menu(){
-    auto startTime = std::chrono::high_resolution_clock::now();
+    const auto startTime = std::chrono::high_resolution_clock::now();
     print_menu();
     string option,name;
     cin>>option;
@@ -92,7 +92,7 @@ void menu(){
         cout<<"\nEnter the file name you want : ";
         cin>>chose1;
         chose=chose+chose1;
-        print_selected_map(chose);
+        playground(chose);
     }
     if(option=="2.2"){
 
@@ -114,7 +114,7 @@ void menu(){
         auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
         A.total_time=duration.count();
         update_account();
-        cout<<"Are you sure you wanna go?";
+        cout<<"Are you sure you wanna go?\n";
         Sleep(1000);
         cout<<"Really?\n";
         Sleep(1000);
@@ -212,9 +212,10 @@ void write_map_to_file(string mode,string name,string path,string write,string p
     name+=".txt";
     name="Maps/"+mode+"/"+name;
     ofstream f(name);
-    f<<write;
+    f<<x<<" "<<y<<endl<<write<<"____"<<endl;
     f<<path<<endl<<path_index;
     f.close();
+    menu();
 }
 
 void print_file_names(string path){
@@ -223,14 +224,35 @@ void print_file_names(string path){
     }
 }
 
-void print_selected_map(string path){
+void print_selected_map(string path,bool answer){
     ifstream f(path);
+    string hold;
+    int a,b;
+    if(answer==false){
+        f>>hold;
+        a=stoi(hold);
+        f>>hold;
+        b=stoi(hold);
+        getline(f,hold);
+        while(hold!="____"){
+            cout<<hold<<endl;
+            Sleep(2000);
+            getline(f,hold);
+        }
+        getline(f,hold);
+        f.close();
+        playground(path,hold);
+    }
+    // else{
+    //     while()
+
+    // }
 }
 
 void creating_account(){
-    string path="Users/"+A.name+".txt";
     cout<<"Please choose a username : ";
     cin>>A.name;
+    string path="Users/"+A.name+".txt";
     ofstream p(path);
     p<<A.name<<endl<<0<<endl<<0<<endl<<0;
     p.close();
@@ -249,4 +271,15 @@ void update_account(){
     ofstream p1(path);
     p1<<A.name<<endl<<total_t<<endl<<wins<<endl<<A.last_win_time;
     p1.close();
+}
+
+void playground(string map_path,string answer){
+    print_selected_map(map_path,false);
+    cout<<"\nEnter your path (example : ddrulud)";
+    string user_ans;
+    cin>>user_ans;
+    if(user_ans==answer){
+        cout<<"\ncongratulations! you answer is correct\n";
+        print_selected_map(map_path,true);
+    }
 }
