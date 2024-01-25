@@ -11,6 +11,9 @@
 #include <ctime>
 #define green "\033[32m"
 #define white "\033[0m"
+#define red   "\033[31m"
+#define blue  "\033[34m"
+#define grey  "\033[90m"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -20,6 +23,8 @@ struct account{
     int win_count=0;
     string last_win_time;
     int total_time;
+    int time_in_game;
+    int game_counter=0;
 }A;
 
 
@@ -36,6 +41,9 @@ string print_selected_map(string,bool);
 void creating_account();
 void update_account();
 void playground(string);
+void add_history(string,string);
+void print_history();
+void print_account_informations();
 
 
 int main(){
@@ -59,13 +67,14 @@ int main(){
 }
 
 void print_menu(){
-    cout<<white<<"1. Create a New Map\n\t- 1.1 Easy\n\t- 1.2 Hard\n";
-    cout<<"2. Playground\n\t- 2.1 Choose from Existing Maps\n\t- 2.2 Import a Custom Map\n";
-    cout<<"3. Solve a Maze\n\t- 3.1 Choose from Existing Maps\n\t- 3.2 Import a Custom Map\n";
-    cout<<"4. History\n";
-    cout<<"5. Leaderboard\n";
-    cout<<"6. Exit\n";
-    cout<<"Enter your option : ";
+    cout<<blue<<"1. Create a New Map\n\t"<<white<<"- 1.1 Easy\n\t- 1.2 Hard\n";
+    cout<<blue<<"2. Playground\n\t"<<white<<"- 2.1 Choose from Existing Maps\n\t- 2.2 Import a Custom Map\n";
+    cout<<blue<<"3. Solve a Maze\n\t"<<white<<"- 3.1 Choose from Existing Maps\n\t- 3.2 Import a Custom Map\n";
+    cout<<blue<<"4. History\n";
+    cout<<blue<<"5. Acount information\n";
+    cout<<blue<<"6. Exit\n";
+    cout<<red<<"Enter your option : ";
+    cout<<white;
 
 }
 
@@ -78,27 +87,47 @@ void menu(){
         cout<<"Choose a name : ";
         cin>>name;
         create_map_easy(name);
+        menu();
     }
 
     if(option=="1.2"){
-
+            //kaviani
     }
-    if(option=="1.2"){
 
-    }
     if(option=="2.1"){
         string chose,chose1;
         cout<<"hard or easy? ";
         cin>>chose;
-        chose="Maps/"+chose+"/";
-        print_file_names(chose);
-        cout<<"\nEnter the file name you want : ";
-        cin>>chose1;
-        chose=chose+chose1;
-        playground(chose);
+        if(chose=="easy"){
+            chose="Maps/"+chose+"/";
+            print_file_names(chose);
+            cout<<"\nEnter the file name you want : ";
+            cin>>chose1;
+            chose=chose+chose1;
+            playground(chose);
+            menu();
+        }
+        else{
+
+            // khaviani
+
+        }
     }
     if(option=="2.2"){
-
+        string choise;
+        cout<<"hard or easy? ";
+        cin>>choise;
+        if(choise=="easy"){
+            cout<<"Choose a name : ";
+            cin>>choise;
+            create_map_easy(choise);
+            choise="Maps/easy/"+choise+".txt";
+            playground(choise);
+            menu();
+        }
+        else{
+            //kaviani
+        }
     }
     if(option=="3.1"){
 
@@ -107,9 +136,13 @@ void menu(){
 
     }
     if(option=="4"){
-
+        print_history();
+        menu();
     }
     if(option=="5"){
+        cout<<"Here is your account informations : \n";
+        print_account_informations();
+        menu();
 
     }
     if(option=="6"){
@@ -196,12 +229,13 @@ void create_map_easy(string name){
         }while(board[a][b]==0);
     }
 
-    for(int i=0;i<x;i++){
-        for(int j=0;j<y;j++){
-            cout<<board[i][j]<<"\t";
-        }
-        cout<<endl;
-    }
+    // for(int i=0;i<x;i++){
+    //     for(int j=0;j<y;j++){
+    //         cout<<board[i][j]<<"\t";
+    //     }
+    //     cout<<endl;
+    // }
+    cout<<"Map Created !\n";
 
     string board_into_string="";         //converting board into string form
     for(int i=0;i<x;i++){
@@ -220,7 +254,6 @@ void write_map_to_file(string mode,string name,string path,string write,string p
     f<<x<<" "<<y<<endl<<write<<"____"<<endl;
     f<<path<<endl<<path_index;
     f.close();
-    menu();
 }
 
 void print_file_names(string path){
@@ -234,19 +267,6 @@ string print_selected_map(string path,bool answer){
     string hold;
     int a,b;
     if(answer==false){
-        // f>>hold;
-        // a=stoi(hold);
-        // f>>hold;
-        // b=stoi(hold);
-        // getline(f,hold);
-        // getline(f,hold);
-        // while(hold!="____"){
-        //     cout<<hold<<endl;
-        //     getline(f,hold);
-        // }
-        // getline(f,hold);
-        // f.close();
-        // return hold;
         f>>hold;
         a=stoi(hold);
         f>>hold;
@@ -270,8 +290,6 @@ string print_selected_map(string path,bool answer){
         getline(f,hold);
         f.close();
         return hold;
-
-
     }
     else{
         f>>hold;
@@ -322,13 +340,21 @@ void update_account(){
     int total_t=stoi(hold)+A.total_time;
     getline(p,hold);
     int wins=stoi(hold)+A.win_count;
+    getline(p,hold);
+    int game_count=stoi(hold)+A.game_counter;
+    getline(p,hold);
+    string date_win=hold;
     p.close();
     ofstream p1(path);
-    p1<<A.name<<endl<<total_t<<endl<<wins<<endl<<A.last_win_time;
+    if(A.last_win_time.size()!=0)
+        p1<<A.name<<endl<<total_t<<endl<<wins<<endl<<game_count<<endl<<A.last_win_time;
+    else
+        p1<<A.name<<endl<<total_t<<endl<<wins<<endl<<game_count<<endl<<date_win;
     p1.close();
 }
 
 void playground(string map_path){
+    auto startTime = std::chrono::high_resolution_clock::now();
     string answer;
     answer=print_selected_map(map_path,false);
     cout<<"\nEnter your path (example : ddrulud)";
@@ -337,17 +363,78 @@ void playground(string map_path){
     if(user_ans==answer){
         cout<<"\ncongratulations! you answer is correct\n";
         A.win_count++;
+        A.game_counter++;
+        //adding win time to struct
         time_t currentTime = std::time(nullptr);
         tm* timeInfo = localtime(&currentTime);
         stringstream ss;
         ss<<put_time(timeInfo, "%Y-%m-%d %H:%M:%S");
         A.last_win_time=ss.str();
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
+        A.time_in_game=duration.count();
         answer=print_selected_map(map_path,true);
+        add_history(map_path,"win");
     }
 
     else{
+        A.game_counter++;
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
+        A.time_in_game=duration.count();
         cout<<"sorry your answer is incorrect :(\nthe right answer is "<<answer<<endl;
         answer=print_selected_map(map_path,true);
+        add_history(map_path,"lose");
     }
-    menu();
+}
+
+void add_history(string map_name,string status){
+    string data,hold,time;
+    ifstream his("history.txt");
+    getline(his,hold);
+    while(!his.eof()){
+        data+=hold+'\n';
+        getline(his,hold);
+    }
+    his.close();
+    ofstream his1("history.txt");
+    //calculating time
+    time_t currentTime = std::time(nullptr);
+    tm* timeInfo = localtime(&currentTime);
+    stringstream ss;
+    ss<<put_time(timeInfo, "%Y-%m-%d %H:%M:%S");
+    time=ss.str();
+    his1<<time<<'\t'<<A.name<<'\t'<<map_name<<'\t'<<A.time_in_game<<'\t'<<status<<'\n';
+    his1<<data;
+    his1.close();
+}
+
+void print_history(){
+    string hold;
+    ifstream f("history.txt");
+    cout<<"The last 10 games : \n";
+    for(int i=1;i<=10;i++){
+        if(!f.eof()){
+            getline(f,hold);
+            cout<<hold<<'\n';
+        }
+    }
+    f.close();
+}
+
+void print_account_informations(){
+    string hold="Users/"+A.name+".txt";
+    ifstream f(hold);
+    getline(f,hold);
+    getline(f,hold);
+    cout<<grey<<"Your total time of games you have played : "<<red<<hold<<'\n';
+    getline(f,hold);
+    cout<<grey<<"Your total number of wins : "<<red<<hold<<'\n';
+    getline(f,hold);
+    cout<<grey<<"Your total number of games you have played : "<<red<<hold<<'\n';
+    getline(f,hold);
+    cout<<grey<<"Your last win date is : "<<red<<hold<<'\n';
+    f.close();
+
+
 }
