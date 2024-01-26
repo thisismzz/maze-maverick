@@ -1,4 +1,0 @@
-//name
-//total time
-//total wins
-//last win time

@@ -11,12 +11,15 @@
 #include <ctime>
 #include <limits>
 #include <functional>
+#include <algorithm>
+#include <unordered_map> 
 
 #define green "\033[32m"
 #define white "\033[0m"
 #define red   "\033[31m"
 #define blue  "\033[34m"
 #define grey  "\033[90m"
+#define yellow "\033[33m"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -43,19 +46,25 @@ void print_file_names(string);
 string print_selected_map(string,bool);
 void creating_account();
 void update_account();
-void playground(string);
+void playground_easy(string);
 void add_history(string,string);
 void print_history();
 void print_account_informations();
 vector<vector<int>> readMazeFromFile(const string);
 bool isValid (const vector<vector<int>>&,int,int,const vector<vector<int>>&);
 bool dfs(const vector<vector<int>>&,int,int,int,int,int,const vector<vector<int>>&);
-void displayMaze(const vector<vector<int>>&,const vector<vector<int>>&);
+void displayMaze(const vector<vector<int>>&,const vector<vector<int>>&);  //for solve maze
 void mazesolve(string);
 void generatemazemap(vector<vector<int>>&,int,int,int,int,int,int&,int&);
 bool DFS(vector<vector<int>>&,int,int,int,int,int,int);
 bool findPath(vector<vector<int>>&,int,int,int,int,int,int,int);
 void mazesolvehard(string);
+vector<vector<int>> readMazeMap(const string);
+void displayMazeMap(const vector<vector<int>>&,const vector<vector<int>>&);   // is for playground
+string playMazeGame(vector<vector<int>>&);
+void playgroundhard(string);
+int count_txt_files(const string &);
+void leaderboard();
 
 int main(){
     // welcome message
@@ -83,7 +92,8 @@ void print_menu(){
     cout<<blue<<"3. Solve a Maze\n\t"<<white<<"- 3.1 Choose from Existing Maps\n\t- 3.2 Import a Custom Map\n";
     cout<<blue<<"4. History\n";
     cout<<blue<<"5. Acount information\n";
-    cout<<blue<<"6. Exit\n";
+    cout<<blue<<"6. Leaderboard\n";
+    cout<<blue<<"7. Exit\n";
     cout<<red<<"Enter your option : ";
     cout<<white;
 
@@ -118,13 +128,17 @@ void menu(){
             cout<<"\nEnter the file name you want : ";
             cin>>chose1;
             chose=chose+chose1;
-            playground(chose);
+            playground_easy(chose);
             menu();
         }
         else{
-
-            // khaviani
-
+            chose="Maps/"+chose+"/";
+            print_file_names(chose);
+            cout<<"\nEnter the file name you want : ";
+            cin>>chose1;
+            chose=chose+chose1;
+            playgroundhard(chose);
+            menu();
         }
     }
     if(option=="2.2"){
@@ -136,16 +150,16 @@ void menu(){
             cin>>choise;
             create_map_easy(choise);
             choise="Maps/easy/"+choise+".txt";
-            playground(choise);
+            playground_easy(choise);
             menu();
         }
         else{
-            // cout<<"Choose a name : ";
-            // cin>>choise;
-            // mazesolvehard(choise);
-            // choise="Maps/hard/"+choise+".txt";
-            // playground(choise);
-            // menu();
+            cout<<"Choose a name : ";
+            cin>>choise;
+            mazesolvehard(choise);
+            choise="Maps/hard/"+choise+".txt";
+            playgroundhard(choise);
+            menu();
         }
     }
     if(option=="3.1"){
@@ -203,6 +217,11 @@ void menu(){
 
     }
     if(option=="6"){
+        cout<<yellow<<"Here is our TOP 3 players(name/win times/time spend) : \n";
+        leaderboard();
+        menu();
+    }
+    if(option=="7"){
         auto endTime = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
         A.total_time=duration.count();
@@ -410,7 +429,7 @@ void update_account(){
     p1.close();
 }
 
-void playground(string map_path){
+void playground_easy(string map_path){
     auto startTime = std::chrono::high_resolution_clock::now();
     string answer;
     answer=print_selected_map(map_path,false);
@@ -500,9 +519,6 @@ void print_account_informations(){
 vector<vector<int>> readMazeFromFile(const string mappath ) {
     ifstream file(mappath);
     vector<vector<int>> maze;
-    if(!file){
-        cout<<"ey vay!!";
-    }
 
     if (file.is_open()) {
     
@@ -695,7 +711,9 @@ bool DFS(vector<vector<int>>& mazemap, int row, int col, int targetLength, int c
     if (row < 0 || row >= rows || col < 0 || col >= columns || mazemap[row][col] == 2) {
         return false;
     }
-
+    // if (currentLength == targetLength && row != rows - 1 && col != columns -1) {
+    //     return false;
+    // }
     if (currentLength == targetLength && row == rows - 1 && col == columns -1) {
         return true;
     }
@@ -801,3 +819,182 @@ void mazesolvehard(string choice) {
     }
     }
 
+
+vector<vector<int>> readMazeMap(const string filename) {
+    ifstream file(filename);
+    vector<vector<int>> mazeMap;
+    int rows, columns;
+
+    if (file.is_open()) {
+        file >> rows >> columns;
+        mazeMap.resize(rows, vector<int>(columns));
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                file >> mazeMap[i][j];
+            }
+        }
+
+        file.close();
+    }
+
+    return mazeMap;
+}
+
+// Function to display the maze map with color
+void displayMazeMap(const vector<vector<int>>& mazeMap, const vector<pair<int, int>>& visitedHouses) {
+    int rows = mazeMap.size();
+    int columns = mazeMap[0].size();
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < columns; j++) {
+            // Check if the house is visited
+            if (find(visitedHouses.begin(), visitedHouses.end(), make_pair(i, j)) != visitedHouses.end()) {
+                // Highlight the visited houses with color
+                cout << green<< mazeMap[i][j]<<'\t';
+            } else {
+                // Display other elements normally
+                cout<< white << mazeMap[i][j]<<'\t';
+            }
+        }
+        cout << endl;
+    }
+}
+
+// Function to play the maze game
+string playMazeGame(vector<vector<int>>& mazeMap) {
+    int row = 0;
+    int col = 0;
+    int sum = mazeMap[0][0];
+    vector<pair<int, int>> visitedHouses = {make_pair(row, col)}; // Include starting house
+
+    while (true) {
+        // Display the maze map with color
+        displayMazeMap(mazeMap, visitedHouses);
+
+        // Check if the player has reached the last house
+        if (row == mazeMap.size() - 1 && col == mazeMap[0].size() - 1) {
+            sum-=mazeMap[row][col];
+            if(sum == mazeMap[row][col])  {
+                cout << "Congratulations! You have reached the last house and won the game!" << endl;
+                return "win";
+            }
+            else{
+                cout<<"You lost the game :("<<endl;
+                return "lose";
+            }    
+        }
+        // Check if the house is valid
+        else if(mazeMap [row][col] == 0 && row != mazeMap.size() - 1 && col != mazeMap[0].size() - 1) {
+            cout << "You hit the block" << endl;
+            return "lose";
+        }
+        
+        // Get the player's move
+        char move;
+        cout << "Enter your move (R/L/U/D for right/left/up/down): ";
+        cin >> move;
+
+        // Update the player's position, sum, and mark the house as visited
+        if (move == 'R' && col < mazeMap[0].size() - 1) {
+            col++;
+        } else if (move == 'L' && col > 0) {
+            col--;
+        } else if (move == 'U' && row > 0) {
+            row--;
+        } else if (move == 'D' && row < mazeMap.size() - 1) {
+            row++;
+        }
+
+        sum += mazeMap[row][col];
+        visitedHouses.push_back(make_pair(row, col));
+    }
+}
+
+void playgroundhard(string mappath){
+    auto startTime = std::chrono::high_resolution_clock::now();
+    vector<vector<int>> mazeMap = readMazeMap(mappath);
+
+    // Play the maze game
+    string status=playMazeGame(mazeMap);
+
+    if(status=="win"){
+        A.win_count++;
+        A.game_counter++;
+        //adding time play to struct
+        time_t currentTime = std::time(nullptr);
+        tm* timeInfo = localtime(&currentTime);
+        stringstream ss;
+        ss<<put_time(timeInfo, "%Y-%m-%d %H:%M:%S");
+        A.last_win_time=ss.str();
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
+        A.time_in_game=duration.count();
+        add_history(mappath,"win");
+    }
+
+    else{
+        A.game_counter++;
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
+        A.time_in_game=duration.count();
+        add_history(mappath,"lose");
+    }
+
+   
+}
+
+void leaderboard(){
+    string holder;   
+    int player; 
+    vector <string> names;
+    vector <int> win_games;
+    vector <int> time_spend;
+    ofstream top_player("top-player.txt");
+    for (const auto& entry : fs::directory_iterator("Users/")){
+            ifstream f(entry.path().filename());
+            cout<<entry.path().filename()<<endl;
+            getline(f,holder);
+            cout<<holder<<endl;
+            // names.push_back(holder);
+            getline(f,holder);
+            cout<<holder<<endl;
+            // time_spend.push_back(stoi(holder));
+            getline(f,holder);
+            cout<<holder<<endl;
+            // win_games.push_back(stoi(holder));
+            f.close();
+    }
+    
+    for(int i=1;i<=3;i++){
+        for(int j=0;j<win_games.size()-1;j++){
+            if(win_games[i]>win_games[i+1]){
+                player=i;
+            }
+            if(win_games[i]==win_games[i+1]){
+                if(time_spend[i]<time_spend[i+1]){
+                    player=i;
+                }
+                else{
+                    player=i+1;
+                }
+            }
+            else{
+                player=i+1;
+            }
+        }
+        top_player<<names[player]<<'\t'<<win_games[player]<<'\t'<<time_spend[player]<<endl;
+        names.erase(names.begin()+player);
+        win_games.erase(win_games.begin()+player);
+        time_spend.erase(time_spend.begin()+player);
+    }
+    top_player.close();
+
+    ifstream f1("top-player.txt");
+    getline(f1,holder);
+    while(!f1.eof()){
+        cout<<red<<holder<<endl;
+        getline(f1,holder);
+    }
+    f1.close();
+}
