@@ -98,7 +98,7 @@ bool DFS(vector<vector<int>>& mazemap, int row, int col, int targetLength, int c
 
             }
     }
-        
+  
     mazemap[row][col] = 1;
 
     return false;
@@ -114,13 +114,13 @@ bool findPath(vector<vector<int>>& mazemap,int rows, int columns, int targetLeng
     return false;
 }
 
-int main() {
+void mazesolvehard(string choice) {
 
     int rows , columns , targetPathLength;
     int minHouseValue , maxHouseValue;
     int minBlockCount , maxBlockCount;
     string mapName;
-
+    mapName == choice ;
     srand(time(0));
     // Step 1: Take the number of rows and columns from the user
     cout << "Enter the number of rows: ";
@@ -137,8 +137,7 @@ int main() {
     cin >> minBlockCount;
     cout << "Enter the maximum number of blocks: ";
     cin >> maxBlockCount;
-    cout << "Enter the name for the map: ";
-    cin >> mapName;
+    
 
     // Step 2: Initialize the labyrinth map
     vector<vector<int>> mazemap(rows, vector<int>(columns, 0)) ;
@@ -152,31 +151,24 @@ int main() {
     
     if (findPath(mazemap , rows , columns , targetPathLength, minHouseValue,  maxHouseValue, minBlockCount, maxBlockCount)) {
         
-        string fileName = "Maps/hard/" + mapName + ".txt";
+        string fileName = "Maps/" + mapName + ".txt";
         ofstream file(fileName);
         
         int mapnum = 0 ;
         if (file.is_open()) {
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < columns; j++) {
-                    file<<rows<<" "<<columns<<endl << mazemap[i][j] <<"\t";
+                    file << mazemap[i][j] << " ";
                 }
                 file << endl;
             }
-            file<<"____"<<endl;
             file.close();
             cout << "Map saved successfully!" << endl;
             mapnum ++ ;
         } else {
             cout << "Error: Unable to save the map." << endl;
-        }
-    }
-    //     ofstream names("names.txt");
-    //     if (names.is_open()) names << mapnum << "-"<< mapName <<endl;
-    // return 0;
-        // }
+        }}
     else {
         cout << "Error: Unable to find a path with the specified length." << endl;
     }
-    
-}
+    }

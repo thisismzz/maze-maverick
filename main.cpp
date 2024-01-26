@@ -9,6 +9,9 @@
 #include <chrono>
 #include <iomanip>
 #include <ctime>
+#include <limits>
+#include <functional>
+
 #define green "\033[32m"
 #define white "\033[0m"
 #define red   "\033[31m"
@@ -44,7 +47,15 @@ void playground(string);
 void add_history(string,string);
 void print_history();
 void print_account_informations();
-
+vector<vector<int>> readMazeFromFile(const string);
+bool isValid (const vector<vector<int>>&,int,int,const vector<vector<int>>&);
+bool dfs(const vector<vector<int>>&,int,int,int,int,int,const vector<vector<int>>&);
+void displayMaze(const vector<vector<int>>&,const vector<vector<int>>&);
+void mazesolve(string);
+void generatemazemap(vector<vector<int>>&,int,int,int,int,int,int&,int&);
+bool DFS(vector<vector<int>>&,int,int,int,int,int,int);
+bool findPath(vector<vector<int>>&,int,int,int,int,int,int,int);
+void mazesolvehard(string);
 
 int main(){
     // welcome message
@@ -91,7 +102,10 @@ void menu(){
     }
 
     if(option=="1.2"){
-            //kaviani
+        cout<<"Choose a name : ";
+        cin>>name;
+        mazesolvehard(name);
+        menu();
     }
 
     if(option=="2.1"){
@@ -126,14 +140,57 @@ void menu(){
             menu();
         }
         else{
-            //kaviani
+            // cout<<"Choose a name : ";
+            // cin>>choise;
+            // mazesolvehard(choise);
+            // choise="Maps/hard/"+choise+".txt";
+            // playground(choise);
+            // menu();
         }
     }
     if(option=="3.1"){
-
+        string chose,chose1;
+        cout<<"hard or easy? ";
+        cin>>chose;
+        if(chose=="easy"){
+            chose="Maps/"+chose+"/";
+            print_file_names(chose);
+            cout<<"\nEnter the file name you want : ";
+            cin>>chose1;
+            chose=chose+chose1;
+            mazesolve(chose);
+            menu();
+        }
+        else{
+            chose="Maps/"+chose+"/";
+            print_file_names(chose);
+            cout<<"\nEnter the file name you want : ";
+            cin>>chose1;
+            chose=chose+chose1;
+            mazesolve(chose);
+            menu();
+        }
     }
     if(option=="3.2"){
-
+        string choise;
+        cout<<"hard or easy? ";
+        cin>>choise;
+        if(choise=="easy"){
+            cout<<"Choose a name : ";
+            cin>>choise;
+            create_map_easy(choise);
+            choise="Maps/easy/"+choise+".txt";
+            mazesolve(choise);
+            menu();
+        }
+        else{
+            cout<<"Choose a name : ";
+            cin>>choise;
+            mazesolvehard(choise);
+            choise="Maps/hard/"+choise+".txt";
+            mazesolve(choise);
+            menu();
+        }
     }
     if(option=="4"){
         print_history();
@@ -438,3 +495,309 @@ void print_account_informations(){
 
 
 }
+
+// Function to read maze from file
+vector<vector<int>> readMazeFromFile(const string mappath ) {
+    ifstream file(mappath);
+    vector<vector<int>> maze;
+    if(!file){
+        cout<<"ey vay!!";
+    }
+
+    if (file.is_open()) {
+    
+        int rows, cols;
+        file >> rows >> cols;
+
+        
+        maze.resize(rows, vector<int>(cols, 0));
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                file >> maze[i][j];
+            }
+        }
+
+        file.close();
+        return maze;
+    }
+    return maze;
+}
+
+// Function to check if a house is valid and not visited
+bool isValid(const vector<vector<int>>& maze, int x, int y, vector<vector<bool>>& visited) {
+    int row = maze.size()-1;
+    int col = maze[0].size()-1;
+    if(x == row && y == col)
+    return x >= 0 && x < maze.size() && y >= 0 && y < maze[0].size() && !visited[x][y] ;
+    else
+    return x >= 0 && x < maze.size() && y >= 0 && y < maze[0].size() && !visited[x][y] && maze[x][y] != 0;
+}
+
+// Depth-First Search algorithm
+bool dfs(vector<vector<int>>& maze, int x, int y, int targetLength, int currentLength, int targetValue, vector<vector<bool>>& visited) {
+    visited[x][y] = true;
+
+    // Check if we reached the target length and the sum condition
+    if (currentLength == targetLength && targetValue == 0 && x == maze.size() - 1 && y == maze[0].size() - 1) {
+        return true;
+    }
+
+   
+    
+    vector<int> numbers = {1, 2, 3, 4};
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+
+    // Shuffle the numbers
+    shuffle(numbers.begin(), numbers.end(), default_random_engine(seed));
+
+    for(int i = 0; i < 4 ; i++){
+        switch(numbers[i]){
+            case 1 : if (isValid(maze , x + 1 , y , visited) && dfs(maze , x + 1 , y , targetLength , currentLength + 1 , targetValue - maze[x][y] , visited)) 
+                    {// color the valid path
+                        // maze[x][y] = -maze[x][y];
+                        return true;
+                    }break;
+            case 2 :if (isValid(maze , x - 1 , y , visited) && dfs(maze , x - 1 , y , targetLength , currentLength + 1 , targetValue - maze[x][y] , visited)) 
+                    {// color the valid path
+                        // maze[x][y] = -maze[x][y];
+                        return true;
+                    }break;
+            case 3 :if (isValid(maze , x , y + 1 , visited) && dfs(maze , x , y + 1 , targetLength , currentLength + 1 , targetValue - maze[x][y] , visited)) 
+                    {// color the valid path
+                        // maze[x][y] = -maze[x][y];
+                        return true;
+                    }break;
+            case 4 :if (isValid(maze , x , y - 1 , visited) && dfs(maze , x , y - 1 , targetLength , currentLength + 1 , targetValue - maze[x][y] , visited)) 
+                    {// color the valid path
+                        // maze[x][y] = -maze[x][y];
+                        return true;
+                    }break;
+            
+        }
+    }
+    visited[x][y] = false;
+    return false;
+}
+// Function to display the maze
+void displayMaze(const vector<vector<int>> maze , vector<vector<bool>>& visited) {
+    for(int i = 0; i < maze.size(); i++){
+             for(int j = 0; j < maze[0].size(); j++)
+             {
+                 if(visited[i][j])
+                     cout << green<< maze[i][j]<<'\t';
+                 else
+                     cout <<white << maze[i][j]<<'\t';
+            }
+             cout << endl;
+         }
+}
+
+
+
+void mazesolve (string choice) {
+    // Get input from the user
+    //string fileName , level;
+    int targetLength;
+
+    // cout << "Enter the file name: ";
+    // cin >> fileName;
+    // cout << "Enter the maze level: " ;
+    // cin >> level ;
+    // Read maze from file
+    vector<vector<int>> maze = readMazeFromFile(choice);
+    cout << "Enter the target path length: ";
+    cin >> targetLength;
+
+    // Initialize visited matrix
+    vector<vector<bool>> visited(maze.size(), vector<bool>(maze[0].size(), false));
+
+    // Find a path using DFS
+    bool pathFound = dfs(maze, 0, 0, targetLength, 0, maze[maze.size() - 1][maze[0].size() - 1], visited);
+
+    // Display the result
+    if (pathFound) {
+        cout << "Path found!\n";
+        displayMaze(maze,visited);
+   
+    } else {
+        cout << "No valid path found.\n";
+    }
+
+}
+
+#include <iostream>
+#include <fstream>
+#include <random>
+#include <vector>
+#include <limits>
+#include <functional>
+#include <chrono>
+#include <ctime>
+
+
+
+using namespace std;
+
+// Function to generate a maze map
+
+void generatemazemap(vector<vector<int>>& mazemap, int rows, int columns, int targetPathLength, int minHouseValue, int maxHouseValue, int& minBlockCount, int& maxBlockCount) {
+   
+   
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> dis(minHouseValue, maxHouseValue);
+
+    int finalHouseValue = 0;
+
+    if (maxBlockCount > (rows*columns - targetPathLength -1))
+        maxBlockCount = (rows*columns - targetPathLength -1) ;
+
+    uniform_int_distribution<> dar(minBlockCount , maxBlockCount);
+    int blockCount = dar(gen) ;
+    
+    for (int i = 0; i < blockCount;) {
+        
+        int randomRow = rand() % rows;
+        int randomColumn = rand() % columns ;
+        
+        if(mazemap[randomRow][randomColumn] != 2 && mazemap[randomRow][randomColumn] != 0 && randomRow != rows - 1 && randomColumn != columns - 1){
+            mazemap[randomRow][randomColumn] = 0;
+            i++;
+        }
+    }
+
+    for (int i = 0; i < rows; i++) {
+        for(int j = 0 ; j < columns ; j++){
+            
+            int num;
+            do{
+                num = dis(gen);
+            }while(num == 0);
+
+            if(mazemap[i][j] == 2){
+                mazemap[i][j] = num ;
+                finalHouseValue += num;                        
+            }
+            else if (mazemap[i][j] != 0 ){
+                mazemap[i][j] = num ;
+            }
+        }
+    }
+    mazemap[rows - 1][columns - 1] = finalHouseValue ; 
+}
+
+
+// Function to find a path with the specified length
+
+bool DFS(vector<vector<int>>& mazemap, int row, int col, int targetLength, int currentLength,int rows, int columns) {
+   
+   
+    if (row < 0 || row >= rows || col < 0 || col >= columns || mazemap[row][col] == 2) {
+        return false;
+    }
+
+    if (currentLength == targetLength && row == rows - 1 && col == columns -1) {
+        return true;
+    }
+
+    mazemap[row][col] = 2;
+     
+    vector<int> numbers = {1, 2, 3, 4};
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+
+    // Shuffle the numbers
+    shuffle(numbers.begin(), numbers.end(), default_random_engine(seed));
+    for(int i = 0; i < 4 ; i++){
+        switch(numbers[i]){
+            case 1 : if (DFS(mazemap, row + 1, col, targetLength, currentLength + 1,rows,columns)) // پایین
+                    return true;
+            break;
+            case 2 : if (DFS(mazemap , row - 1, col, targetLength, currentLength + 1 ,rows,columns)) // بالا
+                    return true;
+            break;
+            case 3 :  if (DFS(mazemap , row, col + 1, targetLength, currentLength + 1,rows,columns)) // راست
+                    return true;
+            break;
+            case 4 : if (DFS(mazemap , row, col - 1, targetLength, currentLength + 1,rows,columns)) // چپ
+                    return true;
+            break;
+           
+
+            }
+    }
+  
+    mazemap[row][col] = 1;
+
+    return false;
+}
+
+bool findPath(vector<vector<int>>& mazemap,int rows, int columns, int targetLength , int minHouseValue, int maxHouseValue, int minBlockCount, int maxBlockCount) {
+  
+    if (DFS(mazemap , 0 , 0 , targetLength, 0,rows,columns)){
+        
+        generatemazemap( mazemap, rows, columns, targetLength, minHouseValue, maxHouseValue,  minBlockCount,  maxBlockCount);
+        return true;
+    }
+    return false;
+}
+
+void mazesolvehard(string choice) {
+
+    int rows , columns , targetPathLength;
+    int minHouseValue , maxHouseValue;
+    int minBlockCount , maxBlockCount;
+    string mapName;
+    mapName = choice ;
+    srand(time(0));
+    // Step 1: Take the number of rows and columns from the user
+    cout << "Enter the number of rows: ";
+    cin >> rows;
+    cout << "Enter the number of columns: ";
+    cin >> columns;
+    cout << "Enter the target path length: ";
+    cin >> targetPathLength;
+    cout << "Enter the minimum allowed value for a house: ";
+    cin >> minHouseValue;
+    cout << "Enter the maximum allowed value for a house: ";
+    cin >> maxHouseValue;
+    cout << "Enter the minimum number of blocks: ";
+    cin >> minBlockCount;
+    cout << "Enter the maximum number of blocks: ";
+    cin >> maxBlockCount;
+    
+
+    // Step 2: Initialize the labyrinth map
+    vector<vector<int>> mazemap(rows, vector<int>(columns, 0)) ;
+    for (int i = 0 ; i < rows; i++)
+    {
+       for(int j = 0 ; j < columns ; j++){
+
+            mazemap[i][j] = 1 ;
+       }
+    }
+    
+    if (findPath(mazemap , rows , columns , targetPathLength, minHouseValue,  maxHouseValue, minBlockCount, maxBlockCount)) {
+        
+        string fileName = "Maps/hard/" + mapName + ".txt";
+        ofstream file(fileName);
+        
+        int mapnum = 0 ;
+        if (file.is_open()) {
+            file << rows << " " << columns << endl ; 
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < columns; j++) {
+                    file << mazemap[i][j] << " ";
+                }
+                file << endl;
+            }
+            file.close();
+            cout << "Map saved successfully!" << endl;
+            mapnum ++ ;
+        } else {
+            cout << "Error: Unable to save the map." << endl;
+        }}
+    else {
+        cout << "Error: Unable to find a path with the specified length." << endl;
+    }
+    }
+
