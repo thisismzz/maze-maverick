@@ -1,3 +1,7 @@
+//this programe has programmed by:
+//Mahdi Zeinalzadeh & Zeinab Kaviani
+//mahdi.zeinal.zadeh.1384@gmail.com
+//z.kaviani1266@gmail.com
 #include <iostream>
 #include <cstdlib>
 #include <windows.h>
@@ -211,7 +215,7 @@ void menu(){
         menu();
     }
     if(option=="5"){
-        cout<<"Here is your account informations : \n";
+        cout<<yellow<<"Here is your account informations : \n";
         print_account_informations();
         menu();
 
@@ -222,7 +226,9 @@ void menu(){
         menu();
     }
     if(option=="7"){
+        //stop the timer
         auto endTime = std::chrono::high_resolution_clock::now();
+        //caculating the spent time
         auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
         A.total_time=duration.count();
         update_account();
@@ -230,7 +236,7 @@ void menu(){
         Sleep(1000);
         cout<<"Really?\n";
         Sleep(1000);
-        cout<<"OK  Hope to See you soon!\n";
+        cout<<red<<"OK  Hope to See you soon!\n";
         exit(0);
     }
     
@@ -305,12 +311,6 @@ void create_map_easy(string name){
         }while(board[a][b]==0);
     }
 
-    // for(int i=0;i<x;i++){
-    //     for(int j=0;j<y;j++){
-    //         cout<<board[i][j]<<"\t";
-    //     }
-    //     cout<<endl;
-    // }
     cout<<"Map Created !\n";
 
     string board_into_string="";         //converting board into string form
@@ -342,6 +342,7 @@ string print_selected_map(string path,bool answer){
     ifstream f(path);
     string hold;
     int a,b;
+    //read the map and save it into a array
     if(answer==false){
         f>>hold;
         a=stoi(hold);
@@ -492,7 +493,7 @@ void print_history(){
     for(int i=1;i<=10;i++){
         if(!f.eof()){
             getline(f,hold);
-            cout<<hold<<'\n';
+            cout<<'\t'<<hold<<'\n';
         }
     }
     f.close();
@@ -611,15 +612,7 @@ void displayMaze(const vector<vector<int>> maze , vector<vector<bool>>& visited)
 
 
 void mazesolve (string choice) {
-    // Get input from the user
-    //string fileName , level;
     int targetLength;
-
-    // cout << "Enter the file name: ";
-    // cin >> fileName;
-    // cout << "Enter the maze level: " ;
-    // cin >> level ;
-    // Read maze from file
     vector<vector<int>> maze = readMazeFromFile(choice);
     cout << "Enter the target path length: ";
     cin >> targetLength;
@@ -945,42 +938,38 @@ void playgroundhard(string mappath){
 }
 
 void leaderboard(){
-    string holder;   
+    string holder,path;   
     int player; 
     vector <string> names;
     vector <int> win_games;
     vector <int> time_spend;
     ofstream top_player("top-player.txt");
     for (const auto& entry : fs::directory_iterator("Users/")){
-            ifstream f(entry.path().filename());
-            cout<<entry.path().filename()<<endl;
+            path=entry.path().string();
+            ifstream f(path);
             getline(f,holder);
-            cout<<holder<<endl;
-            // names.push_back(holder);
+            names.push_back(holder);
             getline(f,holder);
-            cout<<holder<<endl;
-            // time_spend.push_back(stoi(holder));
+            time_spend.push_back(stoi(holder));
             getline(f,holder);
-            cout<<holder<<endl;
-            // win_games.push_back(stoi(holder));
+            win_games.push_back(stoi(holder));
             f.close();
     }
-    
-    for(int i=1;i<=3;i++){
-        for(int j=0;j<win_games.size()-1;j++){
-            if(win_games[i]>win_games[i+1]){
-                player=i;
+    int max=win_games[0];
+    player=0;
+    for(int i=1;i<=3;i++){          // caculating top 3 player in a for loop
+        max=win_games[0];
+        player=0;
+        for(int j=1;j<win_games.size();j++){
+            if(max<win_games[j]){
+                player=j;
+                max=win_games[j];
             }
-            if(win_games[i]==win_games[i+1]){
-                if(time_spend[i]<time_spend[i+1]){
-                    player=i;
+            if(max==win_games[j]){
+                if(time_spend[player]>time_spend[j]){
+                    player=j;
+                    max=win_games[j];
                 }
-                else{
-                    player=i+1;
-                }
-            }
-            else{
-                player=i+1;
             }
         }
         top_player<<names[player]<<'\t'<<win_games[player]<<'\t'<<time_spend[player]<<endl;
@@ -992,9 +981,11 @@ void leaderboard(){
 
     ifstream f1("top-player.txt");
     getline(f1,holder);
+    int count=1;
     while(!f1.eof()){
-        cout<<red<<holder<<endl;
+        cout<<green<<"Player number "<<count<<" : \t"<<red<<holder<<endl;
         getline(f1,holder);
+        count++;
     }
     f1.close();
 }
