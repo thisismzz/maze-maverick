@@ -1,0 +1,12 @@
+2024-01-26 16:59:18	kazem	Maps/easy/kazemjon.txt	6	lose
+2024-01-26 16:54:35	kazem	Maps/easy/1.1.txt	20	win
+2024-01-26 15:27:37	zeinab	Maps/hard/map19.txt	41	lose
+2024-01-26 15:23:40	zeinab	Maps/hard/maptest.txt	8	win
+2024-01-24 11:51:42	mzz	Maps/easy/map888.txt	10	lose
+2024-01-24 11:16:36	mzz	Maps/easy/mah.txt	8	win
+2024-01-24 10:57:51	mzz	Maps/easy/map123.txt	5	win
+2024-01-24 10:56:58	mzz	Maps/easy/map123.txt	8	win
+2024-01-24 10:53:17	mzz	Maps/easy/map123.txt	11	win
+2024-01-24 10:50:33	mzz	Maps/easy/map123.txt	13	lose
+2024-01-24 10:30:31	mzz	Maps/easy/map123.txt	5	lose
+2024-01-24 10:30:09	mzz	Maps/easy/jjj.txt	3	win
