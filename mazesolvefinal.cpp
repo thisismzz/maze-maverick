@@ -132,5 +132,5 @@ void mazesolve (string choice) {
         cout << "No valid path found.\n";
     }
 
-    return 0;
+    return;
 }
